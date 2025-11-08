@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import axios from 'axios';
+import API from '../axiosConfig';
 import { useAuth } from '../context/AuthContext';
 
 const Dashboard = () => {
@@ -12,13 +12,11 @@ const Dashboard = () => {
 
   useEffect(() => {
     fetchUserProducts();
-    // eslint-disable-next-line
   }, []);
 
   const fetchUserProducts = async () => {
     try {
-      const response = await axios.get('http://localhost:5000/api/products');
-      // Admin can see all products; owner sees only their own
+      const response = await API.get('/api/products');
       const userProducts = user.role === "admin"
         ? response.data
         : response.data.filter(p => p.userId._id === user.id);
@@ -32,10 +30,10 @@ const Dashboard = () => {
     e.preventDefault();
     try {
       if (editingId) {
-        await axios.put(`http://localhost:5000/api/products/${editingId}`, formData);
+        await API.put(`/api/products/${editingId}`, formData);
         setEditingId(null);
       } else {
-        await axios.post('http://localhost:5000/api/products', formData);
+        await API.post('/api/products', formData);
       }
       setFormData({ name: '', description: '', price: '', category: '', imageUrl: '' });
       fetchUserProducts();
@@ -56,9 +54,9 @@ const Dashboard = () => {
   };
 
   const handleDelete = async (id) => {
-    if (window.confirm('Are you sure you want to delete this product?')) {
+    if (window.confirm('Are you sure?')) {
       try {
-        await axios.delete(`http://localhost:5000/api/products/${id}`);
+        await API.delete(`/api/products/${id}`);
         fetchUserProducts();
       } catch (error) {
         console.error('Error deleting product:', error);
@@ -69,9 +67,8 @@ const Dashboard = () => {
   return (
     <div className="container mx-auto p-6">
       <h1 className="text-3xl font-bold mb-6">My Products Dashboard</h1>
-      
       <div className="bg-white p-6 rounded-lg shadow-md mb-8">
-        <h2 className="text-xl font-semibold mb-4">{editingId ? 'Edit Product' : 'Add New Product'}</h2>
+        <h2 className="text-xl font-semibold mb-4">{editingId ? 'Edit' : 'Add'} Product</h2>
         <form onSubmit={handleSubmit} className="space-y-4">
           <input
             type="text"
